@@ -1,0 +1,3 @@
+var SVTU = (function() {
+  return {};
+})();
