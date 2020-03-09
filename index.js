@@ -1,11 +1,14 @@
 function createSVTU() {
+  "strict mode";
+
   var author = "yuddomack";
-  return {
+
+  // 'this' must be global obj
+  this.SVTU = {
     author: author
   };
 }
 
-// 'this' must be global obj
 if (!this.SVTU) {
-  this.SVTU = createSVTU();
+  createSVTU();
 }
