@@ -1,3 +1,6 @@
 var SVTU = (function() {
-  return {};
+  var author = "yuddomack";
+  return {
+    author: author
+  };
 })();
