@@ -11,5 +11,5 @@
   // SVTU.expect(arr).toEqual([1, 2]); // 예외발생
 
   SVTU.expect(obj).toEqual({ a: 1 }); // 문제없음
-  SVTU.expect(obj).toEqual({ a: 1, b: 2 }); // 예외발생
+  // SVTU.expect(obj).toEqual({ a: 1, b: 2 }); // 예외발생
 })();
