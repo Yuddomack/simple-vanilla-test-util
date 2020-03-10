@@ -1,8 +1,6 @@
 function createSVTU() {
   "use strict";
 
-  var author = "yuddomack";
-
   function raiseError(expected, received) {
     return new Error(
       ["expected", expected, "but received", received].join(" ")
@@ -27,7 +25,6 @@ function createSVTU() {
   }
 
   return {
-    author: author,
     expect: expect
   };
 }
