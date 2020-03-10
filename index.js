@@ -26,13 +26,21 @@ function createSVTU() {
     };
   }
 
-  // 'this' must be global obj
-  this.SVTU = {
+  return {
     author: author,
     expect: expect
   };
 }
 
-if (!this.SVTU) {
-  createSVTU.call(this);
+// browser
+if (typeof window !== "undefined" && this === window) {
+  window.SVTU = createSVTU();
+
+  // nodejs
+} else if (!!module && !!module.exports) {
+  module.exports = createSVTU();
+} else {
+  throw new Error(
+    "hi dude :) I guess this isn't a normal runtime enviorment \n but you sure, customize this logic"
+  );
 }
