@@ -4,7 +4,7 @@ function createSVTU() {
   var author = "yuddomack";
 
   function expect(received) {
-    function toBe(expected) {
+    function toEqual(expected) {
       if (received === expected) {
       } else {
         throw new Error(
@@ -14,7 +14,7 @@ function createSVTU() {
     }
 
     return {
-      toBe
+      toEqual
     };
   }
 
