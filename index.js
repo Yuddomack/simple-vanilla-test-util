@@ -3,9 +3,18 @@ function createSVTU() {
 
   var author = "yuddomack";
 
+  function expect(value) {
+    function toBe(value) {}
+
+    return {
+      toBe
+    };
+  }
+
   // 'this' must be global obj
   this.SVTU = {
-    author: author
+    author: author,
+    expect: expect
   };
 }
 
