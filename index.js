@@ -3,13 +3,21 @@ function createSVTU() {
 
   var author = "yuddomack";
 
+  function raiseError(expected, received) {
+    return new Error(
+      ["expected", expected, "but received", received].join(" ")
+    );
+  }
+
   function expect(received) {
     function toEqual(expected) {
-      if (received === expected) {
+      var stringifiedExpected = JSON.stringify(expected),
+        stringifiedReceived = JSON.stringify(received);
+
+      if (stringifiedExpected === stringifiedReceived) {
+        console.log("일치");
       } else {
-        throw new Error(
-          ["expected", expected, "but received", received].join(" ")
-        );
+        throw raiseError(stringifiedExpected, stringifiedReceived);
       }
     }
 
