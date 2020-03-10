@@ -3,8 +3,15 @@ function createSVTU() {
 
   var author = "yuddomack";
 
-  function expect(value) {
-    function toBe(value) {}
+  function expect(received) {
+    function toBe(expected) {
+      if (received === expected) {
+      } else {
+        throw new Error(
+          ["expected", expected, "but received", received].join(" ")
+        );
+      }
+    }
 
     return {
       toBe
