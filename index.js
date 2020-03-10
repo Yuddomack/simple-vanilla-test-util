@@ -1,5 +1,5 @@
 function createSVTU() {
-  "strict mode";
+  "use strict";
 
   var author = "yuddomack";
 
@@ -10,5 +10,5 @@ function createSVTU() {
 }
 
 if (!this.SVTU) {
-  createSVTU();
+  createSVTU.call(this);
 }
