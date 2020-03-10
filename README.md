@@ -30,11 +30,11 @@ import { expect } from "svtu";
   In case of using Test method, This function compares two values. and It record to SVTU the comparison results.<br>
   In case of using only `expect().toEqual()` on your code, An exception is thrown if the comparisons differ.<br>
 
-```javascript
-expect(10).toEqual(12);
-expect("test").toEqual("test");
-expect([1, 2, 3]).toEqual(something);
-```
+  ```javascript
+  expect(10).toEqual(12);
+  expect("test").toEqual("test");
+  expect([1, 2, 3]).toEqual(something);
+  ```
 
 ## Future
 
