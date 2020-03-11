@@ -12,9 +12,7 @@ function createSVTU() {
       var stringifiedExpected = JSON.stringify(expected);
       var stringifiedReceived = JSON.stringify(received);
 
-      if (stringifiedExpected === stringifiedReceived) {
-        console.log("일치");
-      } else {
+      if (stringifiedExpected !== stringifiedReceived) {
         throw raiseError(stringifiedExpected, stringifiedReceived);
       }
     }
@@ -24,7 +22,16 @@ function createSVTU() {
     };
   }
 
-  function test(description, task) {}
+  function test(description, testTask) {
+    console.log("[" + description + "] test is started.");
+    try {
+      testTask();
+      console.log("[" + description + "] passed :D");
+    } catch (e) {
+      console.log("[" + description + "] failed :(");
+      console.error(e);
+    }
+  }
 
   return {
     expect: expect,
