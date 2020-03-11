@@ -24,8 +24,11 @@ function createSVTU() {
     };
   }
 
+  function test(description, task) {}
+
   return {
-    expect: expect
+    expect: expect,
+    test: test
   };
 }
 
