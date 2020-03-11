@@ -47,6 +47,7 @@ else if (typeof window === "object" && this === window) {
     var methods = [];
     var underscoreMethods = [];
 
+    // Object.keys doesn't support < IE9
     for (var key in SVTU) {
       if (!SVTU.hasOwnProperty(key)) {
         continue;

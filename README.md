@@ -21,7 +21,7 @@ const { expect } = require("svtu");
 import { expect } from "svtu";
 ```
 
-## Provide Methods
+## API
 
 - expect(value).toEqual(expected) <i>(TODO: 함수 나오면 단어들 고쳐쓰기)</i>
 
