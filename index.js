@@ -23,12 +23,13 @@ function createSVTU() {
   }
 
   function test(description, testTask) {
-    console.log("[" + description + "] test is started.");
+    console.log("[start] " + description); // 외부에 스택으로 관리하면 되려나
+
     try {
       testTask();
-      console.log("[" + description + "] passed :D");
+      console.log(description + " ..... [passed]");
     } catch (e) {
-      console.log("[" + description + "] failed :(");
+      console.error(description) + " ..... [failed]";
       console.error(e);
     }
   }
