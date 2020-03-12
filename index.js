@@ -23,15 +23,45 @@ function createSVTU() {
   }
 
   function test(description, testTask) {
-    console.log("[start] " + description); // 외부에 스택으로 관리하면 되려나
+    var options = {
+      setUp: function() {},
+      tearDown: function() {}
+    };
 
-    try {
-      testTask();
-      console.log(description + " ..... [passed]");
-    } catch (e) {
-      console.error(description) + " ..... [failed]";
-      console.error(e);
-    }
+    return {
+      setUp: function(f) {
+        if (f instanceof Function) {
+          options.setUp = f;
+        } else {
+          throw new Error("setUp is only function");
+        }
+
+        return this;
+      },
+      tearDown: function(f) {
+        if (f instanceof Function) {
+          options.tearDown = f;
+        } else {
+          throw new Error("tearDown is only function");
+        }
+
+        return this;
+      },
+      run: function() {
+        console.log("[start] " + description); // 외부에 스택으로 관리하면 되려나
+        options.setUp();
+
+        try {
+          testTask();
+          console.log(description + " ..... [passed]");
+        } catch (e) {
+          console.error(description) + " ..... [failed]";
+          console.error(e);
+        }
+
+        options.tearDown();
+      }
+    };
   }
 
   return {
@@ -39,6 +69,19 @@ function createSVTU() {
     test: test
   };
 }
+
+// var queue = [];
+// function test(des, f) {
+//   queue.push({
+//     des,
+//     f
+//   });
+// }
+// run도 따로 만들어서
+// function run(f){
+//   f();
+//   queue.pop();
+// }
 
 // nodejs
 if (typeof module === "object" && !!module.exports) {
