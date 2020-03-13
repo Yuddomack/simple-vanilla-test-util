@@ -64,9 +64,51 @@ function createSVTU() {
     };
   }
 
+  var tasks = [
+    {
+      taskName: "",
+      tests: []
+    }
+  ];
+  var depth = 0;
+  // function describe(taskName, taskFunc) {
+  //   depth++;
+
+  //   tasks[depth] = {
+  //     taskName: taskName,
+  //     tests: []
+  //   };
+  //   try {
+  //     taskFunc();
+  //     runTask(); // 걍 재귀식으로 실행하면 before after를 describe in describe에서 쓸수가없음?
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+
+  //   depth--;
+  // }
+
+  // function test(testName, testFunc) {
+  //   // test in test 처리는?
+  //   var now = tasks[depth];
+  //   now.tests.push({
+  //     testName: testName,
+  //     testFunc: testFunc
+  //   });
+  // }
+
+  function beforeEach(func) {
+    if (func instanceof Function) {
+      tasks[depth].beforeEach = func;
+    } else {
+      throw new Error("beforeEach only function");
+    }
+  }
+
   return {
     expect: expect,
-    test: test
+    test: test,
+    tasks: tasks
   };
 }
 
