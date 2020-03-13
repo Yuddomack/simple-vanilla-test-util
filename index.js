@@ -71,6 +71,7 @@ function createSVTU() {
     }
   ];
   var depth = 0;
+  var execute = "";
   // function describe(taskName, taskFunc) {
   //   depth++;
 
@@ -90,6 +91,7 @@ function createSVTU() {
 
   function test(testName, testFunc) {
     console.log(testName);
+    execute = "test";
 
     try {
       tasks[depth].beforeEach();
@@ -100,10 +102,12 @@ function createSVTU() {
   } // runner 아이디어
 
   function beforeEach(func) {
-    if (func instanceof Function) {
-      tasks[depth].beforeEach = func;
-    } else {
+    if (!(func instanceof Function)) {
       throw new Error("beforeEach only function");
+    } else if (execute === "test") {
+      throw new Error("beforeEach cannot inside 'test'");
+    } else {
+      tasks[depth].beforeEach = func;
     }
   }
 

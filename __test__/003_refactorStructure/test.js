@@ -6,6 +6,10 @@
   });
   test("beforeEach test", function() {
     expect(SOMETHING).toEqual([1]);
+
+    // beforeEach(function() {
+    //   console.log("throw");
+    // });
   });
   console.log(tasks);
 })();
