@@ -10,3 +10,4 @@ jest처럼 쓰고싶다!
 - describe는 테스트 테스크를 처리할 수 있다.
 - describe 안에 describe가 들어갈 수 있다.
 - describe 안에 test가 들어갈 수 있다.
+- UI 스레드 동작도 체크해야함

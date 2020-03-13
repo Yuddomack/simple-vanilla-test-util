@@ -64,58 +64,75 @@ function createSVTU() {
     };
   }
 
-  var tasks = [
-    {
-      taskName: "",
-      tests: []
-    }
-  ];
-  var depth = 0;
+  var depth = -1;
   var execute = "";
-  // function describe(taskName, taskFunc) {
-  //   depth++;
+  var describes = [];
+  var hooks = [];
+  var tests = [];
+  var queue = [];
 
-  //   tasks[depth] = {
-  //     taskName: taskName,
-  //     tests: []
-  //   };
-  //   try {
-  //     taskFunc();
-  //     runTask(); // 걍 재귀식으로 실행하면 before after를 describe in describe에서 쓸수가없음?
-  //   } catch (e) {
-  //     console.log(e);
-  //   }
-
-  //   depth--;
-  // }
-
-  function test(testName, testFunc) {
-    console.log(testName);
+  function test(taskName, taskFunc) {
+    console.log(taskName);
     execute = "test";
 
     try {
-      tasks[depth].beforeEach();
-      testFunc();
+      queue.push({
+        depth: depth,
+        name: taskName,
+        func: taskFunc
+      });
+
+      testRunner();
     } catch (e) {
       console.log(e);
     }
-  } // runner 아이디어
+  }
+
+  function testRunner() {
+    var task = queue.shift();
+
+    try {
+      runHooks("beforeEach", task.depth);
+      task.func();
+      //runAfterEach('afterEach', task.depth);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  function runHooks(hookOption, depth) {
+    for (var i = 0; i <= depth; i++) {
+      if (hooks[i] && hooks[i][hookOption]) {
+        hooks[i][hookOption]();
+      }
+    }
+  }
 
   function beforeEach(func) {
+    registerHooks("beforeEach", func);
+  }
+  // TODO: afterEach, All 등도 등록하기
+
+  function registerHooks(hookOption, func) {
     if (!(func instanceof Function)) {
-      throw new Error("beforeEach only function");
+      throw new Error(hookOption + " only function");
     } else if (execute === "test") {
-      throw new Error("beforeEach cannot inside 'test'");
+      throw new Error(hookOption + " only inside 'describe'");
+    } else if (depth < 0) {
+      throw new Error(hookOption + " only inside 'describe'");
     } else {
-      tasks[depth].beforeEach = func;
+      hooks[depth] = {};
+      hooks[depth][hookOption] = func;
     }
   }
 
   return {
     expect: expect,
     test: test,
-    tasks: tasks,
-    beforeEach: beforeEach
+    beforeEach: beforeEach,
+    describe: describe,
+    describes: describes,
+    hooks: hooks
   };
 }
 
