@@ -88,14 +88,16 @@ function createSVTU() {
   //   depth--;
   // }
 
-  // function test(testName, testFunc) {
-  //   // test in test 처리는?
-  //   var now = tasks[depth];
-  //   now.tests.push({
-  //     testName: testName,
-  //     testFunc: testFunc
-  //   });
-  // }
+  function test(testName, testFunc) {
+    console.log(testName);
+
+    try {
+      tasks[depth].beforeEach();
+      testFunc();
+    } catch (e) {
+      console.log(e);
+    }
+  } // runner 아이디어
 
   function beforeEach(func) {
     if (func instanceof Function) {
@@ -108,7 +110,8 @@ function createSVTU() {
   return {
     expect: expect,
     test: test,
-    tasks: tasks
+    tasks: tasks,
+    beforeEach: beforeEach
   };
 }
 
