@@ -68,35 +68,109 @@ function createSVTU() {
   var execute = "";
   var describes = [];
   var hooks = [];
-  var tests = [];
   var queue = [];
 
   function test(taskName, taskFunc) {
-    console.log(taskName);
     execute = "test";
 
-    try {
-      queue.push({
-        depth: depth,
-        name: taskName,
-        func: taskFunc
-      });
+    queue.push({
+      depth: depth,
+      name: taskName,
+      func: taskFunc
+    });
 
+    // depth는 -1로 시작해서 describe가 중첩될수록 증가함
+    // describe 없이 순수 test는 실행을하고, describe에 감싸진 테스트는 describe에서 제어
+    if (depth < 0) {
       testRunner();
-    } catch (e) {
-      console.log(e);
     }
   }
 
   function testRunner() {
     var task = queue.shift();
 
+    runHooks("beforeEach", task.depth);
     try {
-      runHooks("beforeEach", task.depth);
       task.func();
-      //runAfterEach('afterEach', task.depth);
+      console.log(
+        stringRepeat("\t", depth),
+        "*",
+        task.name,
+        "..... [ passed! ]"
+      );
     } catch (e) {
-      console.log(e);
+      console.log(
+        stringRepeat("\t", depth),
+        "*",
+        task.name,
+        "..... [ failed :( ]"
+      );
+      console.error(e);
+    }
+    runHooks("afterEach", task.depth);
+  }
+
+  // 수평으로 있을땐 어쩔건데
+  function describe(taskName, taskFunc) {
+    console.log(stringRepeat("\t", depth), "#", taskName);
+
+    depth++;
+
+    describes[depth] = {
+      name: taskName,
+      func: taskFunc,
+      depth: depth
+    };
+
+    describeRunner();
+
+    depth--;
+  }
+
+  function describeRunner() {
+    var task = describes[depth]; // or pop?
+
+    try {
+      task.func();
+    } catch (e) {
+      console.error(e);
+    }
+
+    runHooks("beforeAll", task.depth);
+    while (queue.length) {
+      testRunner();
+    }
+    runHooks("afterAll", task.depth);
+  }
+
+  function beforeEach(func) {
+    registerHooks("beforeEach", func);
+  }
+
+  function afterEach(func) {
+    registerHooks("afterEach", func);
+  }
+
+  function beforeAll(func) {
+    registerHooks("beforeAll", func);
+  }
+
+  function afterAll(func) {
+    registerHooks("afterAll", func);
+  }
+
+  function registerHooks(hookOption, func) {
+    if (!(func instanceof Function)) {
+      throw new Error(hookOption + " only function");
+    }
+    // else if (execute === "test") {
+    //   throw new Error(hookOption + " only inside 'describe'");
+    // }
+    else if (depth < 0) {
+      throw new Error(hookOption + " only inside 'describe'");
+    } else {
+      hooks[depth] = hooks[depth] || {};
+      hooks[depth][hookOption] = func;
     }
   }
 
@@ -108,28 +182,22 @@ function createSVTU() {
     }
   }
 
-  function beforeEach(func) {
-    registerHooks("beforeEach", func);
-  }
-  // TODO: afterEach, All 등도 등록하기
-
-  function registerHooks(hookOption, func) {
-    if (!(func instanceof Function)) {
-      throw new Error(hookOption + " only function");
-    } else if (execute === "test") {
-      throw new Error(hookOption + " only inside 'describe'");
-    } else if (depth < 0) {
-      throw new Error(hookOption + " only inside 'describe'");
-    } else {
-      hooks[depth] = {};
-      hooks[depth][hookOption] = func;
+  function stringRepeat(str, repeat) {
+    var res = "";
+    for (var i = 0; i <= repeat; i++) {
+      res += str;
     }
+
+    return res;
   }
 
   return {
     expect: expect,
     test: test,
     beforeEach: beforeEach,
+    afterEach: afterEach,
+    beforeAll: beforeAll,
+    afterAll: afterAll,
     describe: describe,
     describes: describes,
     hooks: hooks
