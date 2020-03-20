@@ -2,12 +2,12 @@
   var sequence = "seq";
   test("only use test", function() {
     sequence += " test";
-    expect(sequence).toEqual("seq test");
+    expect(sequence).to.eq("seq test");
   });
 
   describe("describe 1", function() {
     test("test 1 in describe 1", function() {
-      expect(sequence).toEqual("seq test beforeAll beforeEach");
+      expect(sequence).to.eq("seq test beforeAll beforeEach");
       sequence += " test";
     });
 
@@ -26,7 +26,7 @@
   });
 
   test("check after hooks", function() {
-    expect(sequence).toEqual(
+    expect(sequence).to.eq(
       "seq test beforeAll beforeEach test afterEach afterAll"
     );
   });

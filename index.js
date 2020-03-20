@@ -36,47 +36,17 @@ function createSVTU() {
     };
   }
 
-  function test(description, testTask) {
-    var options = {
-      setUp: function() {},
-      tearDown: function() {}
-    };
+  function test() {}
 
-    return {
-      setUp: function(f) {
-        if (f instanceof Function) {
-          options.setUp = f;
-        } else {
-          throw new Error("setUp is only function");
-        }
+  function describe() {}
 
-        return this;
-      },
-      tearDown: function(f) {
-        if (f instanceof Function) {
-          options.tearDown = f;
-        } else {
-          throw new Error("tearDown is only function");
-        }
+  function beforeAll() {}
 
-        return this;
-      },
-      run: function() {
-        console.log("[start] " + description); // 외부에 스택으로 관리하면 되려나
-        options.setUp();
+  function beforeEach() {}
 
-        try {
-          testTask();
-          console.log(description + " ..... [passed]");
-        } catch (e) {
-          console.error(description) + " ..... [failed]";
-          console.error(e);
-        }
+  function afterEach() {}
 
-        options.tearDown();
-      }
-    };
-  }
+  function afterAll() {}
 
   function stringRepeat(str, repeat) {
     var res = "";
@@ -89,7 +59,12 @@ function createSVTU() {
 
   return {
     expect: expect,
-    test: test
+    test: test,
+    describe: describe,
+    beforeAll: beforeAll,
+    beforeEach: beforeEach,
+    afterEach: afterEach,
+    afterAll: afterAll
   };
 }
 
