@@ -36,9 +36,19 @@ function createSVTU() {
     };
   }
 
-  function test() {}
+  var testQueue = [];
+  var depthLevel = 0;
 
-  function describe() {}
+  function test(description, func) {
+    func();
+  }
+
+  function describe(description, func) {
+    // func가 test일때,
+    // func가 describe일때,
+    // func가 hooks일때
+    func();
+  }
 
   function beforeAll() {}
 
