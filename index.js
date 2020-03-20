@@ -32,7 +32,7 @@ function createSVTU() {
     }
 
     return {
-      to
+      to: to
     };
   }
 
