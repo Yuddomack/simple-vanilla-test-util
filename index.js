@@ -36,27 +36,78 @@ function createSVTU() {
     };
   }
 
-  var testQueue = [];
+  var taskQueue = [];
+  var hooksQueue = [];
   var depthLevel = 0;
 
   function test(description, func) {
-    func();
+    // beforeEach 실행
+    taskQueue.push({
+      func: func,
+      depthLevel: depthLevel,
+      runner: testRunner
+    });
+    // afterEach 실행
+
+    if (depthLevel === 0) {
+      // depthLevel이 0인 경우는 describe 없이 test 함수만
+      // 단독으로 사용하는 경우
+      run(); // func(); -> run();
+      // try catch는 runner로 통일하고, 여기서는 푸시 후 바로 러너 호출 이런식으로
+    }
   }
 
+  function testRunner(func) {} // todo 여기까지 생각함
+
   function describe(description, func) {
+    if (depthLevel === 0) {
+      func();
+      return;
+    }
     // func가 test일때,
     // func가 describe일때,
     // func가 hooks일때
+    // describe도 describe 러너를 push 해주는게 맞는듯? tdd의 expression처럼
+
+    depthLevel++;
+
     func();
+    // 러너가 종료되어야 level--이 맞는듯
+    // 왜냐면 러너에서 describe를 만나면 depthLevel이 또 증가할테니
   }
 
-  function beforeAll() {}
+  function run() {
+    var task = taskQueue.shift();
 
-  function beforeEach() {}
+    task.runner(task.func);
+  }
 
-  function afterEach() {}
+  function beforeAll(func) {
+    registerHooks("beforeAll", depthLevel, func);
+  }
 
-  function afterAll() {}
+  function beforeEach(func) {
+    registerHooks("beforeEach", depthLevel, func);
+  }
+
+  function afterEach(func) {
+    registerHooks("afterEach", depthLevel, func);
+  }
+
+  function afterAll(func) {
+    registerHooks("afterAll", depthLevel, func);
+  }
+
+  function registerHooks(hookOption, hookDepthLevel, func) {
+    if (!(func instanceof Function)) {
+      throw new Error(hookOption + " only function");
+    } else if (hookDepthLevel < 0) {
+      throw new Error(hookOption + " only use inside 'describe'");
+    } else {
+      hooksQueue[hookDepthLevel] = hooksQueue[hookDepthLevel] || {};
+      hooksQueue[hookDepthLevel][hookOption] = func;
+    }
+  }
 
   function stringRepeat(str, repeat) {
     var res = "";
@@ -74,7 +125,9 @@ function createSVTU() {
     beforeAll: beforeAll,
     beforeEach: beforeEach,
     afterEach: afterEach,
-    afterAll: afterAll
+    afterAll: afterAll,
+    hooksQueue: hooksQueue,
+    taskQueue: taskQueue
   };
 }
 
