@@ -52,6 +52,6 @@
 
   test("not equal 테스트", function() {
     var arr = [];
-    expect(arr).to.neq([]);
+    expect(arr).to.neq([1]);
   }).run();
 })();
