@@ -88,4 +88,40 @@
   test("check afterEach when fail test", function() {
     expect(sequence).to.eq("");
   });
+
+  describe("template method life cycle", function() {
+    beforeAll(function() {
+      console.log("1 - beforeAll");
+    });
+    afterAll(function() {
+      console.log("1 - afterAll");
+    });
+    beforeEach(function() {
+      console.log("1 - beforeEach");
+    });
+    afterEach(function() {
+      console.log("1 - afterEach");
+    });
+    test("", function() {
+      console.log("1 - test");
+    });
+
+    describe("Scoped / Nested block", function() {
+      beforeAll(function() {
+        console.log("2 - beforeAll");
+      });
+      afterAll(function() {
+        console.log("2 - afterAll");
+      });
+      beforeEach(function() {
+        console.log("2 - beforeEach");
+      });
+      afterEach(function() {
+        console.log("2 - afterEach");
+      });
+      test("", function() {
+        console.log("2 - test");
+      });
+    });
+  });
 })();
