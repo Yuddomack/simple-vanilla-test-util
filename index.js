@@ -66,7 +66,19 @@ function createSVTU() {
       }
       try {
         func();
+        console.log(
+          stringRepeat("\t", depthLevel),
+          "-",
+          description,
+          "..... [ passed! ]"
+        );
       } catch (e) {
+        console.log(
+          stringRepeat("\t", depthLevel),
+          "-",
+          description,
+          "..... [ failed :( ]"
+        );
         console.error(e);
       }
       for (var i = depthLevel; i >= 0; i--) {
@@ -79,6 +91,7 @@ function createSVTU() {
 
   function describe(description, func) {
     if (scan === true) {
+      console.log(stringRepeat("\t", depthLevel), "◼️", description);
       // REVIEW: hooks부터 등록하고 test, describe를 실행하기 위함
       // scan이 false인 동안은 hooks를 등록하고
       // describe 내 test, describe을 queue에 등록만해준다.
@@ -158,18 +171,9 @@ function createSVTU() {
     }
   }
 
-  function runHooks(hookOption, depth) {
-    // after은 역순진행이 맞지않나
-    for (var i = 0; i <= depth; i++) {
-      if (hooksQueue[i] && hooksQueue[i][hookOption]) {
-        hooksQueue[i][hookOption]();
-      }
-    }
-  }
-
   function stringRepeat(str, repeat) {
     var res = "";
-    for (var i = 0; i <= repeat; i++) {
+    for (var i = 0; i < repeat; i++) {
       res += str;
     }
 

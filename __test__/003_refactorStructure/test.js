@@ -51,11 +51,11 @@
         sequence += " beforeEach2";
       });
 
-      test("something", function test1() {
+      test("something 1", function test1() {
         // nothing
       });
 
-      test("something", function test2() {
+      test("something 2", function test2() {
         // nothing
       });
 
