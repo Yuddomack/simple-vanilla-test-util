@@ -41,8 +41,11 @@ function createSVTU() {
   var depthLevel = 0;
 
   function test(description, func) {
+    var testTask = testTaskCreator(description, func);
+
     if (depthLevel === 0) {
-      func();
+      // 단일 test의 경우
+      testTask();
       return;
     }
 
@@ -50,25 +53,27 @@ function createSVTU() {
       taskQueue[depthLevel] = [];
     }
 
-    taskQueue[depthLevel].push(func);
+    taskQueue[depthLevel].push(testTask);
   }
 
-  function testRunner(task) {
-    for (var i = 0; i <= task.depthLevel; i++) {
-      if (hooksQueue[i] && hooksQueue[i].beforeEach) {
-        hooksQueue[i].beforeEach();
+  function testTaskCreator(description, func) {
+    return function() {
+      for (var i = 0; i <= depthLevel; i++) {
+        if (hooksQueue[i] && hooksQueue[i].beforeEach) {
+          hooksQueue[i].beforeEach();
+        }
       }
-    }
-    try {
-      task.func();
-    } catch (e) {
-      console.error(e);
-    }
-    for (var i = task.depthLevel; i >= 0; i--) {
-      if (hooksQueue[i] && hooksQueue[i].afterEach) {
-        hooksQueue[i].afterEach();
+      try {
+        func();
+      } catch (e) {
+        console.error(e);
       }
-    }
+      for (var i = depthLevel; i >= 0; i--) {
+        if (hooksQueue[i] && hooksQueue[i].afterEach) {
+          hooksQueue[i].afterEach();
+        }
+      }
+    };
   }
   var scrap = true;
   function describe(description, func) {
@@ -87,7 +92,9 @@ function createSVTU() {
       taskQueue[depthLevel] = [];
     }
 
-    taskQueue[depthLevel].push(func);
+    taskQueue[depthLevel].push(function() {
+      return describe(description, func);
+    });
   }
 
   function run() {
