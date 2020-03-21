@@ -36,51 +36,144 @@ function createSVTU() {
     };
   }
 
-  function test(description, testTask) {
-    var options = {
-      setUp: function() {},
-      tearDown: function() {}
-    };
+  var taskQueue = [];
+  var hooksQueue = [];
+  var depthLevel = 0;
+  var scan = true;
 
-    return {
-      setUp: function(f) {
-        if (f instanceof Function) {
-          options.setUp = f;
-        } else {
-          throw new Error("setUp is only function");
+  function test(description, func) {
+    var testTask = testTaskCreator(description, func);
+
+    if (depthLevel === 0) {
+      // 단일 test의 경우
+      testTask();
+      return;
+    }
+
+    if (!taskQueue[depthLevel]) {
+      taskQueue[depthLevel] = [];
+    }
+
+    taskQueue[depthLevel].push(testTask);
+  }
+
+  function testTaskCreator(description, func) {
+    return function() {
+      for (var i = 0; i <= depthLevel; i++) {
+        if (hooksQueue[i] && hooksQueue[i].beforeEach) {
+          hooksQueue[i].beforeEach();
         }
-
-        return this;
-      },
-      tearDown: function(f) {
-        if (f instanceof Function) {
-          options.tearDown = f;
-        } else {
-          throw new Error("tearDown is only function");
+      }
+      try {
+        func();
+        console.log(
+          stringRepeat("\t", depthLevel),
+          "-",
+          description,
+          "..... [ passed! ]"
+        );
+      } catch (e) {
+        console.log(
+          stringRepeat("\t", depthLevel),
+          "-",
+          description,
+          "..... [ failed :( ]"
+        );
+        console.error(e);
+      }
+      for (var i = depthLevel; i >= 0; i--) {
+        if (hooksQueue[i] && hooksQueue[i].afterEach) {
+          hooksQueue[i].afterEach();
         }
-
-        return this;
-      },
-      run: function() {
-        console.log("[start] " + description); // 외부에 스택으로 관리하면 되려나
-        options.setUp();
-
-        try {
-          testTask();
-          console.log(description + " ..... [passed]");
-        } catch (e) {
-          console.error(description) + " ..... [failed]";
-          console.error(e);
-        }
-
-        options.tearDown();
       }
     };
   }
 
+  function describe(description, func) {
+    if (scan === true) {
+      console.log(stringRepeat("\t", depthLevel), "◼️", description);
+      // REVIEW: hooks부터 등록하고 test, describe를 실행하기 위함
+      // scan이 false인 동안은 hooks를 등록하고
+      // describe 내 test, describe을 queue에 등록만해준다.
+      // 각 describe는 1 depth의 level을 갖는다.
+      scan = false;
+      depthLevel++;
+      func();
+
+      // 스캔작업이 끝나면 queue에 들어잇는 task들을 실행한다.
+      // 이때 queue에 있는 작업이 describeTask면 다음 depth의 task들을 스캔한다.
+      scan = true;
+      run();
+
+      // queue를 모두 실행하면 describe 실행을 끝 마친 것이다.
+      depthLevel--;
+
+      return;
+    }
+
+    var describeTask = describeTaskCreator(description, func);
+    if (!taskQueue[depthLevel]) {
+      taskQueue[depthLevel] = [];
+    }
+
+    taskQueue[depthLevel].push(describeTask);
+  }
+
+  function describeTaskCreator(description, func) {
+    return function() {
+      describe(description, func);
+    };
+  }
+
+  function run() {
+    var tasks = taskQueue[depthLevel];
+
+    if (hooksQueue[depthLevel] && hooksQueue[depthLevel].beforeAll) {
+      hooksQueue[depthLevel].beforeAll();
+    }
+
+    for (var i = 0; i < tasks.length; i++) {
+      tasks[i]();
+    }
+
+    if (hooksQueue[depthLevel] && hooksQueue[depthLevel].afterAll) {
+      hooksQueue[depthLevel].afterAll();
+    }
+
+    hooksQueue.splice(depthLevel, 1);
+    taskQueue.splice(depthLevel, 1);
+  }
+
+  function beforeAll(func) {
+    registerHooks("beforeAll", depthLevel, func);
+  }
+
+  function beforeEach(func) {
+    registerHooks("beforeEach", depthLevel, func);
+  }
+
+  function afterEach(func) {
+    registerHooks("afterEach", depthLevel, func);
+  }
+
+  function afterAll(func) {
+    registerHooks("afterAll", depthLevel, func);
+  }
+
+  function registerHooks(hookOption, hookDepthLevel, func) {
+    if (!(func instanceof Function)) {
+      throw new Error(hookOption + " only function");
+    } else if (hookDepthLevel < 0) {
+      throw new Error(hookOption + " only use inside 'describe'");
+    } else {
+      hooksQueue[hookDepthLevel] = hooksQueue[hookDepthLevel] || {};
+      hooksQueue[hookDepthLevel][hookOption] = func;
+    }
+  }
+
   function stringRepeat(str, repeat) {
     var res = "";
-    for (var i = 0; i <= repeat; i++) {
+    for (var i = 0; i < repeat; i++) {
       res += str;
     }
 
@@ -89,7 +182,14 @@ function createSVTU() {
 
   return {
     expect: expect,
-    test: test
+    test: test,
+    describe: describe,
+    beforeAll: beforeAll,
+    beforeEach: beforeEach,
+    afterEach: afterEach,
+    afterAll: afterAll,
+    hooksQueue: hooksQueue,
+    taskQueue: taskQueue
   };
 }
 
