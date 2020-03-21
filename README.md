@@ -83,3 +83,4 @@ test("test for test", function() {
 
 - ui 표시
 - mocking
+- 더 나은 구조화?
