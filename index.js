@@ -39,7 +39,7 @@ function createSVTU() {
   var taskQueue = [];
   var hooksQueue = [];
   var depthLevel = 0;
-  var scrap = true;
+  var scan = true;
 
   function test(description, func) {
     var testTask = testTaskCreator(description, func);
@@ -78,12 +78,21 @@ function createSVTU() {
   }
 
   function describe(description, func) {
-    if (scrap === true) {
-      scrap = false;
+    if (scan === true) {
+      // REVIEW: hooks부터 등록하고 test, describe를 실행하기 위함
+      // scan이 false인 동안은 hooks를 등록하고
+      // describe 내 test, describe을 queue에 등록만해준다.
+      // 각 describe는 1 depth의 level을 갖는다.
+      scan = false;
       depthLevel++;
       func();
-      scrap = true;
+
+      // 스캔작업이 끝나면 queue에 들어잇는 task들을 실행한다.
+      // 이때 queue에 있는 작업이 describeTask면 다음 depth의 task들을 스캔한다.
+      scan = true;
       run();
+
+      // queue를 모두 실행하면 describe 실행을 끝 마친 것이다.
       depthLevel--;
 
       return;
