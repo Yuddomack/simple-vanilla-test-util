@@ -23,7 +23,7 @@ import { expect } from "svtu";
 
 ## API
 
-### - expect(value).to.eq(expected) <i>(TODO: 함수 나오면 단어들 고쳐쓰기)</i>
+### - expect(value).to.eq(expected)
 
 테스트 함수 내에서 `expect().to.eq()`을 통해 두 값을 비교하고 결과 리포트를 제공받을 수 있습니다.<br>
 이 메소드를 단독으로 사용하면, equal 조건에 맞지 않을 때 exception을 발생시킵니다.<br><br>
