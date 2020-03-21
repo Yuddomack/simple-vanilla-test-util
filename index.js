@@ -41,45 +41,82 @@ function createSVTU() {
   var depthLevel = 0;
 
   function test(description, func) {
-    // beforeEach 실행
-    taskQueue.push({
-      func: func,
-      depthLevel: depthLevel,
-      runner: testRunner
-    });
-    // afterEach 실행
-
-    if (depthLevel === 0) {
-      // depthLevel이 0인 경우는 describe 없이 test 함수만
-      // 단독으로 사용하는 경우
-      run(); // func(); -> run();
-      // try catch는 runner로 통일하고, 여기서는 푸시 후 바로 러너 호출 이런식으로
-    }
-  }
-
-  function testRunner(func) {} // todo 여기까지 생각함
-
-  function describe(description, func) {
     if (depthLevel === 0) {
       func();
       return;
     }
-    // func가 test일때,
-    // func가 describe일때,
-    // func가 hooks일때
-    // describe도 describe 러너를 push 해주는게 맞는듯? tdd의 expression처럼
 
-    depthLevel++;
+    if (!taskQueue[depthLevel]) {
+      taskQueue[depthLevel] = [];
+    }
 
-    func();
-    // 러너가 종료되어야 level--이 맞는듯
-    // 왜냐면 러너에서 describe를 만나면 depthLevel이 또 증가할테니
+    taskQueue[depthLevel].push(func);
+  }
+
+  function testRunner(task) {
+    for (var i = 0; i <= task.depthLevel; i++) {
+      if (hooksQueue[i] && hooksQueue[i].beforeEach) {
+        hooksQueue[i].beforeEach();
+      }
+    }
+    try {
+      task.func();
+    } catch (e) {
+      console.error(e);
+    }
+    for (var i = task.depthLevel; i >= 0; i--) {
+      if (hooksQueue[i] && hooksQueue[i].afterEach) {
+        hooksQueue[i].afterEach();
+      }
+    }
+  }
+  var scrap = true;
+  function describe(description, func) {
+    if (scrap === true) {
+      scrap = false;
+      depthLevel++;
+      func();
+      scrap = true;
+      run();
+      depthLevel--;
+
+      return;
+    }
+
+    if (!taskQueue[depthLevel]) {
+      taskQueue[depthLevel] = [];
+    }
+
+    taskQueue[depthLevel].push(func);
   }
 
   function run() {
-    var task = taskQueue.shift();
+    var tasks = taskQueue[depthLevel];
 
-    task.runner(task.func);
+    hooksQueue[depthLevel] &&
+      hooksQueue[depthLevel].beforeAll &&
+      hooksQueue[depthLevel].beforeAll();
+
+    for (var i = 0; i < tasks.length; i++) {
+      for (var bi = 0; bi <= depthLevel; bi++) {
+        hooksQueue[bi] &&
+          hooksQueue[bi].beforeEach &&
+          hooksQueue[bi].beforeEach();
+      }
+      tasks[i]();
+      for (var ai = depthLevel; ai >= 0; ai--) {
+        hooksQueue[ai] &&
+          hooksQueue[ai].afterEach &&
+          hooksQueue[ai].afterEach();
+      }
+    }
+
+    hooksQueue[depthLevel] &&
+      hooksQueue[depthLevel].afterAll &&
+      hooksQueue[depthLevel].afterAll();
+
+    hooksQueue.splice(depthLevel, 1);
+    taskQueue.splice(depthLevel, 1);
   }
 
   function beforeAll(func) {
@@ -106,6 +143,15 @@ function createSVTU() {
     } else {
       hooksQueue[hookDepthLevel] = hooksQueue[hookDepthLevel] || {};
       hooksQueue[hookDepthLevel][hookOption] = func;
+    }
+  }
+
+  function runHooks(hookOption, depth) {
+    // after은 역순진행이 맞지않나
+    for (var i = 0; i <= depth; i++) {
+      if (hooksQueue[i] && hooksQueue[i][hookOption]) {
+        hooksQueue[i][hookOption]();
+      }
     }
   }
 
