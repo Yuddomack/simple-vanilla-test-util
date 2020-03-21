@@ -5,8 +5,8 @@
     expect(isGood).to.eq(true);
   });
 
-  describe("describe 1", function() {
-    test("test 1 in describe 1", function() {
+  describe("check template method", function() {
+    test("test in describe", function() {
       sequence += " test";
     });
 
@@ -24,11 +24,11 @@
     });
   });
 
-  test("check hooks", function() {
+  test("check result from template method", function() {
     expect(sequence).to.eq("seq beforeAll beforeEach test afterEach afterAll");
   });
 
-  describe("describe 2", function() {
+  describe("check describe in describe template method", function() {
     //
 
     beforeAll(function() {
@@ -43,7 +43,7 @@
       sequence += " afterEach";
     });
 
-    describe("describe 2-1", function desc2() {
+    describe("describe level 2", function desc2() {
       beforeAll(function() {
         sequence += " beforeAll2";
       });
@@ -51,11 +51,11 @@
         sequence += " beforeEach2";
       });
 
-      test("something 1", function test1() {
+      test("test 1 in describe level 2", function test1() {
         // nothing
       });
 
-      test("something 2", function test2() {
+      test("test 2 in describe level 2", function test2() {
         // nothing
       });
 
@@ -65,9 +65,27 @@
     });
   });
 
-  test("check hooks", function() {
+  test("check result from describe in describe template method", function() {
     expect(sequence).to.eq(
       "seq beforeAll2 beforeEach beforeEach2 afterEach beforeEach beforeEach2 afterEach afterAll2"
     );
+  });
+
+  describe("afterEach when fail test", function() {
+    beforeAll(function() {
+      sequence = "seq";
+    });
+
+    test("raise exception", function() {
+      expect(10).to.eq(20);
+    });
+
+    afterEach(function() {
+      sequence = "";
+    });
+  });
+
+  test("check afterEach when fail test", function() {
+    expect(sequence).to.eq("");
   });
 })();
