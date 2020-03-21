@@ -39,6 +39,7 @@ function createSVTU() {
   var taskQueue = [];
   var hooksQueue = [];
   var depthLevel = 0;
+  var scrap = true;
 
   function test(description, func) {
     var testTask = testTaskCreator(description, func);
@@ -75,7 +76,7 @@ function createSVTU() {
       }
     };
   }
-  var scrap = true;
+
   function describe(description, func) {
     if (scrap === true) {
       scrap = false;
@@ -88,39 +89,34 @@ function createSVTU() {
       return;
     }
 
+    var describeTask = describeTaskCreator(description, func);
     if (!taskQueue[depthLevel]) {
       taskQueue[depthLevel] = [];
     }
 
-    taskQueue[depthLevel].push(function() {
-      return describe(description, func);
-    });
+    taskQueue[depthLevel].push(describeTask);
+  }
+
+  function describeTaskCreator(description, func) {
+    return function() {
+      describe(description, func);
+    };
   }
 
   function run() {
     var tasks = taskQueue[depthLevel];
 
-    hooksQueue[depthLevel] &&
-      hooksQueue[depthLevel].beforeAll &&
+    if (hooksQueue[depthLevel] && hooksQueue[depthLevel].beforeAll) {
       hooksQueue[depthLevel].beforeAll();
-
-    for (var i = 0; i < tasks.length; i++) {
-      for (var bi = 0; bi <= depthLevel; bi++) {
-        hooksQueue[bi] &&
-          hooksQueue[bi].beforeEach &&
-          hooksQueue[bi].beforeEach();
-      }
-      tasks[i]();
-      for (var ai = depthLevel; ai >= 0; ai--) {
-        hooksQueue[ai] &&
-          hooksQueue[ai].afterEach &&
-          hooksQueue[ai].afterEach();
-      }
     }
 
-    hooksQueue[depthLevel] &&
-      hooksQueue[depthLevel].afterAll &&
+    for (var i = 0; i < tasks.length; i++) {
+      tasks[i]();
+    }
+
+    if (hooksQueue[depthLevel] && hooksQueue[depthLevel].afterAll) {
       hooksQueue[depthLevel].afterAll();
+    }
 
     hooksQueue.splice(depthLevel, 1);
     taskQueue.splice(depthLevel, 1);
